@@ -1,0 +1,16 @@
+{
+  "name": "@nicolasey/ffe-data-download",
+  "version": "0.1.0",
+  "description": "Download and unpack the French Chess Federation PAPI archive",
+  "module": "index.ts",
+  "types": "./index.ts",
+  "exports": "./index.ts",
+  "type": "module",
+  "files": ["index.ts", "src"],
+  "keywords": ["chess", "papi", "ffe", "echecs", "download", "zip", "mdb"],
+  "license": "MIT",
+  "repository": { "url": "git+https://github.com/nicolasey/ffe-data-download.git" },
+  "dependencies": { "fflate": "^0.8.2" },
+  "devDependencies": { "@types/bun": "latest" },
+  "peerDependencies": { "typescript": "^5.0.0" }
+}

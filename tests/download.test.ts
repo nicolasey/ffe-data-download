@@ -35,6 +35,16 @@ describe("fetchPapiArchive", () => {
     expect(stub.calls[0]!.url).toBe(PAPI_URL);
   });
 
+  test("goes where it is told when given a url", async () => {
+    // The documented escape hatch for the day the FFE moves the file, or for
+    // pointing at a local mirror. Asserting the default alone cannot see it.
+    const stub = stubFetch(zipResponse());
+    await fetchPapiArchive({ fetch: stub.fetch, url: "https://mirror.test/Papi.zip" });
+
+    expect(stub.calls[0]!.url).toBe("https://mirror.test/Papi.zip");
+    expect(stub.calls[0]!.url).not.toBe(PAPI_URL);
+  });
+
   test("returns the archive bytes and the cache validators", async () => {
     const stub = stubFetch(zipResponse());
     const result = await fetchPapiArchive({ fetch: stub.fetch });
@@ -76,22 +86,46 @@ describe("fetchPapiArchive", () => {
   test("names the URL and the status when the server refuses", async () => {
     const stub = stubFetch(new Response("nope", { status: 503, statusText: "Service Unavailable" }));
 
-    expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/503/);
-    expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/echecs\.asso\.fr/);
+    // `.rejects` returns a promise. Unawaited, the test ends before the
+    // assertion runs and passes whatever the code does.
+    await expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/503/);
+    await expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/echecs\.asso\.fr/);
   });
 
   test("a 404 is an error, not an archive of an HTML error page", async () => {
     const stub = stubFetch(new Response("<html>gone</html>", { status: 404 }));
 
-    expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/404/);
+    await expect(fetchPapiArchive({ fetch: stub.fetch })).rejects.toThrow(/404/);
+    await expect(downloadPapi({ fetch: stub.fetch })).rejects.toThrow(/404/);
   });
 
-  test("honours an abort signal", async () => {
+  test("passes the abort signal down to fetch", async () => {
+    // Aborting a request to a dead port proves nothing — the connection fails
+    // either way. What matters is that the signal reaches fetch at all.
+    const controller = new AbortController();
+    const seen: { signal?: AbortSignal | null } = {};
+
+    const spy = (async (_url: string | URL | Request, init?: RequestInit) => {
+      seen.signal = init?.signal;
+      return zipResponse();
+    }) as unknown as typeof globalThis.fetch;
+
+    await fetchPapiArchive({ fetch: spy, signal: controller.signal });
+
+    expect(seen.signal).toBe(controller.signal);
+  });
+
+  test("an aborted signal rejects rather than returning a partial archive", async () => {
     const controller = new AbortController();
     controller.abort();
 
-    expect(
-      fetchPapiArchive({ url: "http://127.0.0.1:1/none", signal: controller.signal }),
+    const spy = (async (_url: string | URL | Request, init?: RequestInit) => {
+      init?.signal?.throwIfAborted();
+      return zipResponse();
+    }) as unknown as typeof globalThis.fetch;
+
+    await expect(
+      fetchPapiArchive({ fetch: spy, signal: controller.signal }),
     ).rejects.toThrow();
   });
 });

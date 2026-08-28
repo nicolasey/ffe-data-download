@@ -33,6 +33,17 @@ describe("extractPapi", () => {
     expect(extractPapi(archive({ "DATA.MDB": mdb })).filename).toBe("DATA.MDB");
   });
 
+  test("takes the first .mdb when an archive holds several", () => {
+    // Archive order decides, and it has to be stable — silently switching to
+    // the last entry would swap which database gets imported.
+    const first = new TextEncoder().encode("first");
+    const second = new TextEncoder().encode("second");
+    const result = extractPapi(zipSync({ "Data.mdb": first, "Old.mdb": second }));
+
+    expect(result.filename).toBe("Data.mdb");
+    expect(result.data).toEqual(first);
+  });
+
   test("takes a named entry when asked", () => {
     const wanted = new TextEncoder().encode("the other one");
     const zip = archive({ "Data.mdb": mdb, "Archive.mdb": wanted });

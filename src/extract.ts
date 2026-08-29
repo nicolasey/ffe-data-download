@@ -1,5 +1,5 @@
 import { unzipSync } from "fflate";
-import type { ExtractOptions, PapiDatabase } from "./types";
+import type { ExtractOptions, PapiDatabase } from "./types.js";
 
 /** Names of the entries in a zip, without inflating any of them. */
 export function listEntries(archive: Uint8Array): string[] {

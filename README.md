@@ -16,7 +16,8 @@ bun add @nicolasey/ffe-data-download
 npm install @nicolasey/ffe-data-download
 ```
 
-> Ships as TypeScript source, no build step. One dependency,
+> ESM only, Node 18+ (needs global `fetch`). Ships compiled JavaScript with
+> type declarations, so Bun, Node and bundlers all work. One dependency,
 > [fflate](https://github.com/101arrowz/fflate), which has none of its own.
 
 ## Usage

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { existsSync, readFileSync } from "node:fs";
 import { zipSync } from "fflate";
-import { extractPapi, listEntries } from "../src/extract";
+import { extractPapi, listEntries } from "../src/extract.js";
 
 const mdb = new TextEncoder().encode("not really an Access file, but bytes are bytes");
 

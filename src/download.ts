@@ -1,4 +1,4 @@
-import { withDatabase } from "./extract";
+import { withDatabase } from "./extract.js";
 import {
   PAPI_URL,
   type ExtractOptions,
@@ -6,7 +6,7 @@ import {
   type NotModified,
   type PapiArchive,
   type PapiDatabase,
-} from "./types";
+} from "./types.js";
 
 function conditionalHeaders(options: FetchOptions): Record<string, string> {
   const headers: Record<string, string> = {};

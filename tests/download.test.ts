@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { zipSync } from "fflate";
-import { downloadPapi, fetchPapiArchive } from "../src/download";
-import { PAPI_URL } from "../src/types";
+import { downloadPapi, fetchPapiArchive } from "../src/download.js";
+import { PAPI_URL } from "../src/types.js";
 
 const mdb = new TextEncoder().encode("Access bytes");
 const zip = zipSync({ "Data.mdb": mdb });
